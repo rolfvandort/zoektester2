@@ -3,41 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zoeken in Rechtspraak.nl</title>
+    <title>Megafilter Rechtspraak & Wettenbank</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1><span class="icon">⚖️</span> Filter Database van Rechtspraak.nl</h1>
-        <p class="subtitle">Gebruikt de officiële Open Data API op basis van metadata</p>
-        
-        <div class="filters">
-            <div class="filter-group">
-                <label for="dateFrom">Uitspraakdatum (vanaf)</label>
-                <input type="date" id="dateFrom">
+    <div class="header-bar">
+        <div class="header-content container">
+            <div class="logo">
+                <img src="https://i.postimg.cc/wB3qYvbY/Van-Dort-logo-compleet-RGB-scaled.jpg" alt="Van Dort Letselschade Logo">
             </div>
-            <div class="filter-group">
-                <label for="dateTo">Uitspraakdatum (tot en met)</label>
-                <input type="date" id="dateTo">
-            </div>
-            <div class="filter-group">
-                <label for="subject">Rechtsgebied</label>
-                <select id="subject">
-                    <option value="">Alle rechtsgebieden</option>
-                    <option value="http://psi.rechtspraak.nl/rechtsgebied#bestuursrecht">Bestuursrecht</option>
-                    <option value="http://psi.rechtspraak.nl/rechtsgebied#civielRecht">Civiel recht</option>
-                    <option value="http://psi.rechtspraak.nl/rechtsgebied#internationaalRecht">Internationaal recht</option>
-                    <option value="http://psi.rechtspraak.nl/rechtsgebied#strafrecht">Strafrecht</option>
-                </select>
+            <div class="user-info">
+                <span>Ingelogd als: <strong>Raoul van Dort</strong></span>
+                <span class="location">Maastricht, Limburg, Netherlands</span>
             </div>
         </div>
-        
-        <div class="search-box">
-             <button id="searchButton">Filter Resultaten</button>
+    </div>
+
+    <div class="main-content-grid container">
+        <div class="jurisprudence-column">
+            <div class="dashboard-card" id="jurisprudenceCard">
+                <div class="card-header">
+                    <h2><span class="icon">⚖️</span> Jurisprudentie Zoeker</h2>
+                </div>
+                <div class="card-body">
+                    <div id="apiFilters" class="filter-section">
+                        <h3>Haal een brede selectie op:</h3>
+                        <div class="filter-grid">
+                            <div class="filter-group">
+                                <label for="dateFrom">Uitspraakdatum (vanaf)</label>
+                                <input type="date" id="dateFrom">
+                            </div>
+                            <div class="filter-group">
+                                <label for="dateTo">Uitspraakdatum (tot en met)</label>
+                                <input type="date" id="dateTo">
+                            </div>
+                            <div class="filter-group">
+                                <label for="modifiedFrom">Wijzigingsdatum (vanaf)</label>
+                                <input type="date" id="modifiedFrom">
+                            </div>
+                            <div class="filter-group">
+                                <label for="modifiedTo">Wijzigingsdatum (tot en met)</label>
+                                <input type="date" id="modifiedTo">
+                            </div>
+                            <div class="filter-group">
+                                <label for="subject">Rechtsgebied</label>
+                                <select id="subject"><option value="">-- Selecteer --</option></select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="procedure">Procedure</label>
+                                <select id="procedure"><option value="">-- Selecteer --</option></select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="type">Type Document</label>
+                                <select id="type">
+                                    <option value="">-- Selecteer --</option>
+                                    <option value="Uitspraak">Uitspraak</option>
+                                    <option value="Conclusie">Conclusie</option>
+                                </select>
+                            </div>
+                            <div class="filter-group autocomplete-container">
+                                <label for="creator">Instantie</label>
+                                <input type="text" id="creator" placeholder="Typ om te zoeken...">
+                                <div id="creatorSuggestions" class="autocomplete-suggestions"></div>
+                            </div>
+                        </div>
+                        <button id="apiSearchButton" class="primary-button">Haal resultaten op</button>
+                        <p class="button-subtext">Maximaal 1000 resultaten.</p>
+                    </div>
+
+                    <div id="smartSearchSection" class="filter-section hidden">
+                        <hr class="separator">
+                        <h3>Zoek met trefwoorden binnen deze resultaten:</h3>
+                        <div class="smart-search-controls">
+                            <input type="text" id="smartSearchInput" placeholder="Zoek op trefwoord...">
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="searchIn" value="title" checked> Titel</label>
+                                <label><input type="checkbox" name="searchIn" value="summary" checked> Samenvatting</label>
+                                <label><input type="checkbox" name="searchIn" value="ecli"> ECLI</label>
+                                <label><input type="checkbox" name="searchIn" value="zaaknummer"> Zaaknummer</label>
+                            </div>
+                            <button id="smartFilterButton" class="secondary-button">Filter Binnen Resultaten</button>
+                        </div>
+                    </div>
+                    
+                    <div id="jurisprudenceResultsContainer">
+                        <div id="jurisprudenceStatus" class="status-message"></div>
+                        <div id="jurisprudenceResults"></div>
+                        <div id="jurisprudencePagination"></div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div id="status"></div>
-        <div id="results"></div>
+        <div class="wettenbank-column">
+            <div id="pinnedItemContainer" class="dashboard-card hidden">
+                <div class="card-header">
+                    <h3><span class="icon">📌</span> Gepind Dossier</h3>
+                </div>
+                <div class="card-body" id="pinnedItemContent">
+                    </div>
+            </div>
+
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2><span class="icon">📖</span> Wettenbank Zoeker</h2>
+                </div>
+                <div class="card-body">
+                    <div class="filter-section">
+                        <h3>Zoeken op trefwoord:</h3>
+                        <div class="filter-group">
+                            <label for="wettenbankKeyword">Trefwoord</label>
+                            <input type="text" id="wettenbankKeyword" placeholder="Bijv. Wegenverkeerswet 1994...">
+                        </div>
+                    </div>
+                    <button id="wettenbankSearchButton" class="primary-button">Zoek in Wettenbank</button>
+                    
+                    <div id="wettenbankResultsContainer">
+                        <div id="wettenbankStatus" class="status-message"></div>
+                        <div id="wettenbankResults"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
