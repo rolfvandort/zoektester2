@@ -53,8 +53,18 @@ exports.handler = async (event) => {
                     }
                 }
 
+                const enrichedDetails = {};
+                if (enrichedData['gzd:productArea']) {
+                    enrichedDetails['overheidwetgeving:product-area'] = enrichedData['gzd:productArea'];
+                }
+                if (enrichedData['gzd:organizationType']) {
+                    enrichedDetails['overheidwetgeving:organisatietype'] = enrichedData['gzd:organizationType'];
+                }
+
+
                 records.push({
                     ...originalData,
+                    ...enrichedDetails,
                     urls: urlData
                 });
             });
@@ -75,9 +85,18 @@ exports.handler = async (event) => {
                      urlData[enrichedData['gzd:itemUrl']['@manifestation']] = enrichedData['gzd:itemUrl']['#text'];
                 }
             }
+            
+            const enrichedDetails = {};
+             if (enrichedData['gzd:productArea']) {
+                 enrichedDetails['overheidwetgeving:product-area'] = enrichedData['gzd:productArea'];
+             }
+             if (enrichedData['gzd:organizationType']) {
+                 enrichedDetails['overheidwetgeving:organisatietype'] = enrichedData['gzd:organizationType'];
+             }
 
              records.push({
                 ...originalData,
+                ...enrichedDetails,
                 urls: urlData
              });
         }
@@ -101,4 +120,3 @@ exports.handler = async (event) => {
         };
     }
 };
- 
