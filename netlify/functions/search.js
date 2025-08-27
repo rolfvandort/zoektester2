@@ -23,7 +23,7 @@ exports.handler = async (event) => {
         }
     }
 
-    const apiUrl = `https://repository.overheid.nl/sru?operation=searchRetrieve&version=2.0&query=${encodeURIComponent(cqlQuery)}&startRecord=${startRecord}&maximumRecords=${maximumRecords}&httpAccept=application/xml&facetLimit=100:dt.type,100:dt.creator,100:dt.subject`;
+    const apiUrl = `https://repository.overheid.nl/sru?operation=searchRetrieve&version=2.0&query=${encodeURIComponent(cqlQuery)}&startRecord=${startRecord}&maximumRecords=${maximumRecords}&httpAccept=application/xml&facetLimit=100:dt.type,100:dt.creator,100:dt.subject,100:w.organisatietype`;
 
     try {
         const response = await axios.get(apiUrl);
