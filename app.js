@@ -27,6 +27,16 @@ document.addEventListener('DOMContentLoaded', () => {
         'dt.subject': 'Thema'
     };
 
+    const initializeFilters = () => {
+        filtersContainer.innerHTML = '';
+        for (const index in availableFilters) {
+            const filterGroup = document.createElement('div');
+            filterGroup.className = 'filter-group';
+            filterGroup.innerHTML = `<h3>${availableFilters[index]}</h3><div class="filter-options"></div>`;
+            filtersContainer.appendChild(filterGroup);
+        }
+    };
+
     const searchData = async () => {
         resultsInfo.textContent = 'Zoeken...';
         resultsList.innerHTML = '';
@@ -71,15 +81,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const item = document.createElement('div');
             item.className = 'result-item';
             
-            const title = record['dcterms:title'] || record['dcterms:identifier'] || 'Geen titel beschikbaar';
-            const creator = record['dcterms:creator'] || 'Onbekend';
-            const date = record['dcterms:issued'] || 'Onbekend';
+            const identifier = record['dcterms:identifier'] || 'Geen identifier beschikbaar';
+            const title = record['dcterms:title'] || 'Geen titel beschikbaar';
             const type = record['dcterms:type'] || 'Onbekend';
+            const subject = record['dcterms:subject'] || 'Onbekend';
+            const creator = record['dcterms:creator'] || 'Onbekend';
+            const issued = record['dcterms:issued'] || 'Onbekend';
+            const productArea = record['overheidwetgeving:product-area'] || 'Onbekend';
+            const organizationType = record['overheidwetgeving:organisatietype'] || 'Onbekend';
 
             item.innerHTML = `
                 <h3>${title}</h3>
                 <div class="result-meta">
-                    <strong>Type:</strong> ${type} | <strong>Uitgever:</strong> ${creator} | <strong>Datum:</strong> ${date}
+                    <strong>Identifier:</strong> ${identifier}<br>
+                    <strong>Type:</strong> ${type}<br>
+                    <strong>Thema:</strong> ${subject}<br>
+                    <strong>Uitgever:</strong> ${creator} | <strong>Organisatietype:</strong> ${organizationType}<br>
+                    <strong>Datum van uitgifte:</strong> ${issued}<br>
+                    <strong>Productgebied:</strong> ${productArea}
                 </div>
             `;
             
@@ -190,21 +209,19 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const updateFilters = (facets) => {
-        filtersContainer.innerHTML = '';
-        if (!facets) return;
+        const filterGroups = filtersContainer.querySelectorAll('.filter-group');
+        filterGroups.forEach(group => {
+            const filterOptions = group.querySelector('.filter-options');
+            filterOptions.innerHTML = '';
+            const h3Text = group.querySelector('h3').textContent;
+            const index = Object.keys(availableFilters).find(key => availableFilters[key] === h3Text);
 
-        facets.forEach(facet => {
-            const index = facet.index;
-            if (!availableFilters[index]) return;
+            if (!facets) return;
 
-            const filterGroup = document.createElement('div');
-            filterGroup.className = 'filter-group';
-            filterGroup.innerHTML = `<h3>${availableFilters[index]}</h3>`;
+            const facetData = facets.find(f => f.index === index);
+            if (!facetData) return;
             
-            const filterOptions = document.createElement('div');
-            filterOptions.className = 'filter-options';
-            
-            facet.terms.forEach(term => {
+            facetData.terms.forEach(term => {
                 const labelText = term.actualTerm;
                 const count = term.count;
                 const checkboxId = `filter-${index}-${labelText.replace(/\s/g, '-')}`;
@@ -234,9 +251,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 filterOptions.appendChild(optionDiv);
             });
-
-            filterGroup.appendChild(filterOptions);
-            filtersContainer.appendChild(filterGroup);
         });
     };
 
@@ -265,5 +279,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Initial load
+    initializeFilters();
     searchData(); 
 });
