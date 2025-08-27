@@ -12,9 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const detailsModal = document.getElementById('details-modal');
     const closeModalButton = document.getElementById('close-modal');
 
-    // Vercel/Netlify Serverless Function endpoint
     const API_ENDPOINT = '/.netlify/functions/search'; 
-    // const API_ENDPOINT = '/api/search'; // Example for Vercel
 
     let currentQuery = '';
     let currentPage = 1;
@@ -24,7 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const availableFilters = {
         'dt.type': 'Documenttype',
         'dt.creator': 'Organisatie',
-        'dt.subject': 'Thema'
+        'dt.subject': 'Thema',
+        'w.organisatietype': 'Organisatietype'
     };
 
     const initializeFilters = () => {
@@ -35,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
             filterGroup.innerHTML = `<h3>${availableFilters[index]}</h3><div class="filter-options"></div>`;
             filtersContainer.appendChild(filterGroup);
         }
+        filtersContainer.innerHTML += `<p style="font-style: italic; font-size: 0.9em; color: var(--dark-gray); margin-top: 1rem;">Filteropties verschijnen na een zoekopdracht.</p>`;
     };
 
     const searchData = async () => {
@@ -81,11 +81,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const item = document.createElement('div');
             item.className = 'result-item';
             
-            const identifier = record['dcterms:identifier'] || 'Geen identifier beschikbaar';
-            const title = record['dcterms:title'] || 'Geen titel beschikbaar';
+            const identifier = record['dcterms:identifier'] || '';
+            const title = record['dcterms:title'] || 'Geen titel';
             const type = record['dcterms:type'] || 'Onbekend';
-            const subject = record['dcterms:subject'] || 'Onbekend';
-            const creator = record['dcterms:creator'] || 'Onbekend';
+            const subject = Array.isArray(record['dcterms:subject']) ? record['dcterms:subject'].join(', ') : record['dcterms:subject'] || 'Onbekend';
+            const creator = Array.isArray(record['dcterms:creator']) ? record['dcterms:creator'].join(', ') : record['dcterms:creator'] || 'Onbekend';
             const issued = record['dcterms:issued'] || 'Onbekend';
             const productArea = record['overheidwetgeving:product-area'] || 'Onbekend';
             const organizationType = record['overheidwetgeving:organisatietype'] || 'Onbekend';
@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
             item.innerHTML = `
                 <h3>${title}</h3>
                 <div class="result-meta">
-                    <strong>Identifier:</strong> ${identifier}<br>
+                    ${identifier ? `<strong>Identifier:</strong> ${identifier}<br>` : ''}
                     <strong>Type:</strong> ${type}<br>
                     <strong>Thema:</strong> ${subject}<br>
                     <strong>Uitgever:</strong> ${creator} | <strong>Organisatietype:</strong> ${organizationType}<br>
@@ -173,39 +173,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const totalPages = Math.ceil(totalResults / 10);
         
-        const prevButton = document.createElement('button');
-        prevButton.textContent = 'Vorige';
-        prevButton.disabled = currentPage === 1;
-        prevButton.addEventListener('click', () => {
-            currentPage--;
-            searchData();
-            window.scrollTo(0, 0);
-        });
-        paginationContainer.appendChild(prevButton);
-
-        for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
-            const pageButton = document.createElement('button');
-            pageButton.textContent = i;
-            if (i === currentPage) {
-                pageButton.classList.add('active');
+        const createPaginationButton = (text, page, isActive = false) => {
+            const button = document.createElement('button');
+            button.textContent = text;
+            button.disabled = isActive;
+            if (isActive) {
+                button.classList.add('active');
             }
-            pageButton.addEventListener('click', () => {
-                currentPage = i;
+            button.addEventListener('click', () => {
+                currentPage = page;
                 searchData();
                 window.scrollTo(0, 0);
             });
+            return button;
+        };
+
+        const firstButton = createPaginationButton('Eerste', 1, currentPage === 1);
+        paginationContainer.appendChild(firstButton);
+
+        const prevButton = createPaginationButton('Vorige', currentPage - 1, currentPage === 1);
+        paginationContainer.appendChild(prevButton);
+        
+        let startPage = Math.max(1, currentPage - 4);
+        let endPage = Math.min(totalPages, currentPage + 5);
+
+        if (endPage - startPage < 9) {
+            if (currentPage <= 5) {
+                endPage = Math.min(totalPages, 10);
+            } else if (totalPages - currentPage < 5) {
+                startPage = Math.max(1, totalPages - 9);
+            }
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            const pageButton = createPaginationButton(i, i, i === currentPage);
             paginationContainer.appendChild(pageButton);
         }
 
-        const nextButton = document.createElement('button');
-        nextButton.textContent = 'Volgende';
-        nextButton.disabled = currentPage === totalPages;
-        nextButton.addEventListener('click', () => {
-            currentPage++;
-            searchData();
-            window.scrollTo(0, 0);
-        });
+        const nextButton = createPaginationButton('Volgende', currentPage + 1, currentPage === totalPages);
         paginationContainer.appendChild(nextButton);
+
+        const lastButton = createPaginationButton('Laatste', totalPages, currentPage === totalPages);
+        paginationContainer.appendChild(lastButton);
     };
 
     const updateFilters = (facets) => {
@@ -280,5 +289,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial load
     initializeFilters();
-    searchData(); 
+    searchData();
 });
