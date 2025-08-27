@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zoeken in Rechtspraak.nl</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><span class="icon">⚖️</span> Filter Database van Rechtspraak.nl</h1>
+        <p class="subtitle">Gebruikt de officiële Open Data API op basis van metadata</p>
+        
+        <div class="filters">
+            <div class="filter-group">
+                <label for="dateFrom">Uitspraakdatum (vanaf)</label>
+                <input type="date" id="dateFrom">
+            </div>
+            <div class="filter-group">
+                <label for="dateTo">Uitspraakdatum (tot en met)</label>
+                <input type="date" id="dateTo">
+            </div>
+            <div class="filter-group">
+                <label for="subject">Rechtsgebied</label>
+                <select id="subject">
+                    <option value="">Alle rechtsgebieden</option>
+                    <option value="http://psi.rechtspraak.nl/rechtsgebied#bestuursrecht">Bestuursrecht</option>
+                    <option value="http://psi.rechtspraak.nl/rechtsgebied#civielRecht">Civiel recht</option>
+                    <option value="http://psi.rechtspraak.nl/rechtsgebied#internationaalRecht">Internationaal recht</option>
+                    <option value="http://psi.rechtspraak.nl/rechtsgebied#strafrecht">Strafrecht</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="search-box">
+             <button id="searchButton">Filter Resultaten</button>
+        </div>
+
+        <div id="status"></div>
+        <div id="results"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
