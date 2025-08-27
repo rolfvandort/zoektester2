@@ -23,7 +23,7 @@ exports.handler = async (event) => {
         }
     }
 
-    const apiUrl = `https://repository.overheid.nl/sru?operation=searchRetrieve&version=2.0&query=${encodeURIComponent(cqlQuery)}&startRecord=${startRecord}&maximumRecords=${maximumRecords}&httpAccept=application/xml&facetLimit=100:dt.type,100:dt.creator,100:dt.subject,100:w.organisatietype`;
+    const apiUrl = `https://repository.overheid.nl/sru?operation=searchRetrieve&version=2.0&query=${encodeURIComponent(cqlQuery)}&startRecord=${startRecord}&maximumRecords=${maximumRecords}&httpAccept=application/xml&facetLimit=100:dt.type,100:dt.creator,100:dt.subject`;
 
     try {
         const response = await axios.get(apiUrl);
@@ -101,7 +101,11 @@ exports.handler = async (event) => {
              });
         }
 
-        const facets = result['sru:searchRetrieveResponse']['sru:facetedResults']['facet:facet'];
+        let facets = result['sru:searchRetrieveResponse']['sru:facetedResults'] ? result['sru:searchRetrieveResponse']['sru:facetedResults']['facet:facet'] : null;
+        if (facets && !Array.isArray(facets)) {
+            facets = [facets];
+        }
+
         const totalResults = result['sru:searchRetrieveResponse']['sru:numberOfRecords'];
 
         return {
@@ -109,7 +113,7 @@ exports.handler = async (event) => {
             body: JSON.stringify({
                 totalResults,
                 records,
-                facets: Array.isArray(facets) ? facets : [facets]
+                facets: facets
             })
         };
     } catch (error) {
